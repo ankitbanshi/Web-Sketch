@@ -2,6 +2,7 @@ import { useState } from "react";
 import React from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { toast } from "react-toastify";
+import myImage from '../../assets/image-removebg-preview (2).png';
 
 const CreateJoinRoom = ({
   uuid,
@@ -52,11 +53,10 @@ const CreateJoinRoom = ({
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-blue-50  p-5 text-gray-800">
-      <h1 className="text-4xl font-bold text-center mb-10 drop-shadow-lg">
-      Create and Collaborate in Real-Time with WebSketch
+     <img src="/image-removebg-preview (2).png" alt="myImage" className="w-32 h-32 rounded-lg shadow-md" />
 
-      </h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-4xl">
+      
+      <div className=" mb-10 grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-4xl">
         {/* Create Room Section */}
         <div className="bg-white p-6 rounded-lg shadow-lg w-full text-gray-900 transform transition duration-300 hover:scale-105">
           <h2 className="text-2xl font-semibold text-blue-600 text-center mb-4">
@@ -136,6 +136,10 @@ const CreateJoinRoom = ({
           </form>
         </div>
       </div>
+      <h1 className="text-4xl p-5 font-bold text-center  drop-shadow-lg">
+      Create and Collaborate in Real-Time with WebSketch
+
+      </h1>
     </div>
   );
 };

@@ -17,6 +17,7 @@
     "react-router-dom": "^7.3.0",
     "react-toastify": "^11.0.5",
     "roughjs": "^4.6.6",
+    "socket.io-client": "^4.8.1",
     "tailwindcss": "^4.0.12",
     "uuid": "^11.1.0"
   },

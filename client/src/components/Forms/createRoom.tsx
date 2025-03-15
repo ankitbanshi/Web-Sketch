@@ -2,7 +2,6 @@ import { useState } from "react";
 import React from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { toast } from "react-toastify";
-import myImage from '../../assets/image-removebg-preview (2).png';
 
 const CreateJoinRoom = ({
   uuid,

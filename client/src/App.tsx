@@ -34,7 +34,8 @@ const App = () => {
       S4() +
       "-" +
       S4() +
-      "-" +S4() +
+      "-" +
+      S4() +
       "-" +
       S4() 
     );
@@ -45,17 +46,17 @@ const App = () => {
     
        
  <>
-        {/* <CreartejoinRoom
+        <CreartejoinRoom
           uuid={uuid}
           setRoomJoined={setRoomJoined}
           setUser={setUser}
-        /> */}
-        <Whiteboard  
+        /> 
+        { <Whiteboard  
         userNo={userNo}
      
         socket={socket}
         setUsers={setUsers}
-        setUserNo={setUserNo}/>
+        setUserNo={setUserNo}/> }
       
       </>
   );

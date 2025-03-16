@@ -26,6 +26,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ userNo, socket, setUsers, setUs
   const [elements, setElements] = useState<ElementType[]>([]);
   const [history, setHistory] = useState<ElementType[]>([]);
   const [tool, setTool] = useState<"pencil" | "line" | "rect">("pencil");
+  
 
   useEffect(() => {
     socket.on("message", (data: { message: string }) => {
@@ -59,11 +60,14 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ userNo, socket, setUsers, setUs
     setElements([]);
   };
 
-  const undo = () => {
-    if (elements.length === 0) return;
-    setHistory((prevHistory) => [...prevHistory, elements[elements.length - 1]]);
-    setElements((prevElements) => prevElements.slice(0, -1));
-  };
+ const undo = () => {
+  setElements((prevElements) => {
+    if (prevElements.length === 0) return prevElements;
+    
+    setHistory((prevHistory) => [...prevHistory, prevElements[prevElements.length - 1]]);
+    return prevElements.slice(0, -1);
+  });
+};
 
   const redo = () => {
     if (history.length === 0) return;

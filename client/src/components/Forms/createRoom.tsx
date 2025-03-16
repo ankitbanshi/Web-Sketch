@@ -12,8 +12,9 @@ const CreateJoinRoom = ({
   setUser: (user: any) => void;
   setRoomJoined: (joined: boolean) => void;
 }) => {
+  const initialRoomId = uuid();
   const [userName, setUserName] = useState("");
-  const [roomId, setRoomId] = useState(uuid());
+  const [roomId, setRoomId] = useState<string>(initialRoomId);
   const [joinName, setJoinName] = useState("");
   const [joinRoomId, setJoinRoomId] = useState("");
   const [copied, setCopied] = useState(false);
@@ -26,12 +27,13 @@ const CreateJoinRoom = ({
     }
     setUser({
       roomId,
-      userId: uuid(),
+      userId: initialRoomId,
       userName: userName,
       host: true,
       presenter: true,
     });
     setRoomJoined(true);
+    console.log(roomId, userName,);
   };
 
   const handleJoinSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -42,7 +44,7 @@ const CreateJoinRoom = ({
     }
     setUser({
       roomId: joinRoomId,
-      userId: uuid(),
+      userId: initialRoomId,
       userName: joinName,
       host: false,
       presenter: false,
@@ -79,7 +81,7 @@ const CreateJoinRoom = ({
               <button
                 className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition"
                 type="button"
-                onClick={() => setRoomId(uuid())}
+                onClick={() => setRoomId(initialRoomId)}
               >
                 Generate
               </button>
@@ -101,6 +103,7 @@ const CreateJoinRoom = ({
             <button
               type="submit"
               className="w-full bg-gray-800 text-white py-2 rounded hover:bg-gray-900 transition"
+              onClick={()=>handleCreateSubmit}
             >
               Create Room
             </button>

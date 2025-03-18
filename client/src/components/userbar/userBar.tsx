@@ -12,7 +12,7 @@ interface userBarProps {
   socket: Socket;
 }
 
-const userBar: React.FC<userBarProps> = ({ users,  socket }) => {
+const UserBar: React.FC<userBarProps> = ({ users,  socket }) => {
   const userBarRef = useRef<HTMLDivElement | null>(null);
 
   const openUserBar = () => {
@@ -58,4 +58,4 @@ const userBar: React.FC<userBarProps> = ({ users,  socket }) => {
   );
 };
 
-export default userBar;
+export default UserBar;

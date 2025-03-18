@@ -12,9 +12,8 @@ const CreateJoinRoom = ({
   setUser: (user: any) => void;
   setRoomJoined: (joined: boolean) => void;
 }) => {
-  const initialRoomId = uuid();
   const [userName, setUserName] = useState("");
-  const [roomId, setRoomId] = useState<string>(initialRoomId);
+  const [roomId, setRoomId] = useState<string>(uuid()); // Generate on mount
   const [joinName, setJoinName] = useState("");
   const [joinRoomId, setJoinRoomId] = useState("");
   const [copied, setCopied] = useState(false);
@@ -27,13 +26,13 @@ const CreateJoinRoom = ({
     }
     setUser({
       roomId,
-      userId: initialRoomId,
-      userName: userName,
+      userId: roomId, // Use the generated ID
+      userName,
       host: true,
       presenter: true,
     });
     setRoomJoined(true);
-    console.log(roomId, userName,);
+    console.log(roomId, userName);
   };
 
   const handleJoinSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -44,7 +43,7 @@ const CreateJoinRoom = ({
     }
     setUser({
       roomId: joinRoomId,
-      userId: initialRoomId,
+      userId: uuid(), // Generate a new ID for the joining user
       userName: joinName,
       host: false,
       presenter: false,
@@ -53,11 +52,8 @@ const CreateJoinRoom = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-blue-50  p-5 text-gray-800">
-     <img src="/image-removebg-preview (2).png" alt="myImage" className="w-32 h-32 rounded-lg shadow-md" />
-
-      
-      <div className=" mb-10 grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-4xl">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-blue-50 p-5 text-gray-800">
+      <div className="mb-10 grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-4xl">
         {/* Create Room Section */}
         <div className="bg-white p-6 rounded-lg shadow-lg w-full text-gray-900 transform transition duration-300 hover:scale-105">
           <h2 className="text-2xl font-semibold text-blue-600 text-center mb-4">
@@ -81,7 +77,7 @@ const CreateJoinRoom = ({
               <button
                 className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition"
                 type="button"
-                onClick={() => setRoomId(initialRoomId)}
+                onClick={() => setRoomId(uuid())} // Generate new ID
               >
                 Generate
               </button>
@@ -89,12 +85,14 @@ const CreateJoinRoom = ({
                 text={roomId}
                 onCopy={() => {
                   setCopied(true);
-                  toast.success("Room Id Copied To Clipboard!");
+                  toast.success("Room ID Copied To Clipboard!");
                   setTimeout(() => setCopied(false), 2000);
                 }}
               >
                 <button
-                  className={`px-4 py-2 rounded-full transition ${copied ? "bg-green-500" : "bg-gray-700 hover:bg-gray-800"} text-white`}
+                  className={`px-4 py-2 rounded-full transition ${
+                    copied ? "bg-green-500" : "bg-gray-700 hover:bg-gray-800"
+                  } text-white`}
                 >
                   {copied ? "Copied!" : "Copy"}
                 </button>
@@ -103,12 +101,12 @@ const CreateJoinRoom = ({
             <button
               type="submit"
               className="w-full bg-gray-800 text-white py-2 rounded hover:bg-gray-900 transition"
-              onClick={()=>handleCreateSubmit}
             >
               Create Room
             </button>
           </form>
         </div>
+
         {/* Join Room Section */}
         <div className="bg-white p-6 rounded-lg shadow-lg w-full text-gray-900 transform transition duration-300 hover:scale-105">
           <h2 className="text-2xl font-semibold text-blue-600 text-center mb-4">
@@ -124,7 +122,7 @@ const CreateJoinRoom = ({
             />
             <input
               type="text"
-              placeholder="Room Id"
+              placeholder="Room ID"
               className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={joinRoomId}
               onChange={(e) => setJoinRoomId(e.target.value)}
@@ -138,9 +136,8 @@ const CreateJoinRoom = ({
           </form>
         </div>
       </div>
-      <h1 className="text-4xl p-5 font-bold text-center  drop-shadow-lg">
-      Create and Collaborate in Real-Time with WebSketch
-
+      <h1 className="text-4xl p-5 font-bold text-center drop-shadow-lg">
+        Create and Collaborate in Real-Time with WebSketch
       </h1>
     </div>
   );

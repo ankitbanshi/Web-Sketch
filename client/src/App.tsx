@@ -1,9 +1,10 @@
-import React, { useEffect, useState,useRef, use } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import  { useEffect, useState} from "react";
+import {  ToastContainer } from "react-toastify";
 import CreartejoinRoom from "./components/Forms/createRoom";
 import io from "socket.io-client";
 import Whiteboard from "./components/whiteBoard"
-import { Router,Route } from "react-router-dom";
+import Userbar from "./components/userbar/userBar";
+import ClientRoom from "./pages/clientRoom";
 const server = "http://localhost:5000";
 
 const connectionOptions = {
@@ -13,15 +14,14 @@ const connectionOptions = {
   transports: ["websocket"],
 };  
 
-
+interface User {
+  id: string;
+  username: string;
+  presenter?: boolean;
+}
 
 const socket = io(server, connectionOptions);
 const App = () => {
-  const [userNo, setUserNo] = useState(0);
-  const [roomJoined, setRoomJoined] = useState(false);
-  const [user, setUser] = useState({});
-  const [users, setUsers] = useState<any[]>([]);
-
   const uuid = () => {
     var S4 = () => {
       return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
@@ -36,33 +36,36 @@ const App = () => {
       S4() 
     );
   };
+  const [userNo, setUserNo] = useState(0);
+  const [roomJoined, setRoomJoined] = useState(false);
+  const [user, setUser] = useState<User>({ id: uuid(), username: "", presenter: false });
+  const [users, setUsers] = useState<any[]>([]);
+  
+
 
 
   useEffect(() => {
     if(roomJoined){
-      socket.emit("user-joined",user);
+      socket.emit("userJoined",user);
     }},[roomJoined]);
 
  
   return (
-    
-       
-//  <>
-//         <CreartejoinRoom
-//           uuid={uuid}
-//           setRoomJoined={setRoomJoined}
-//           setUser={setUser}
-//         /> 
-//         { <Whiteboard  
-//         userNo={userNo}
-     
-//         socket={socket}
-//         setUsers={setUsers}
-//         setUserNo={setUserNo}/> }
-      
-//       </>
+  
+
 <div className="home">
-  <ToastContainer/>?
+  <ToastContainer/>
+  {roomJoined?(
+    <>
+      <Userbar users={users} user={user} socket={socket} />{
+        user.presenter ? (
+        <Whiteboard user={user} userNo={userNo}  socket={socket} setUsers={setUsers} setUserNo={setUserNo}/>
+      ):(
+          <ClientRoom userNo={userNo} socket={socket} setUsers={setUsers} setUserNo={setUserNo}/>)}
+          </> ):(
+            <CreartejoinRoom uuid={uuid} setUser={setUser} setRoomJoined={setRoomJoined}/>
+          )}
+
 </div>
   );
 };

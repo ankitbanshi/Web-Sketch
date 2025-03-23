@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { Socket } from "socket.io-client";
-
+import ChatBox from "../chat";
 interface User {
   id: string;
   username: string;
@@ -10,9 +10,10 @@ interface userBarProps {
   users: User[];
   user: User;
   socket: Socket;
+  userNo:number;
 }
 
-const UserBar: React.FC<userBarProps> = ({ users,  socket }) => {
+const UserBar: React.FC<userBarProps> = ({ users,  socket ,userNo}) => {
   const userBarRef = useRef<HTMLDivElement | null>(null);
 
   const openUserBar = () => {
@@ -39,6 +40,7 @@ const UserBar: React.FC<userBarProps> = ({ users,  socket }) => {
         className="fixed top-0 left-[-100%] h-full w-40 bg-gray-900 text-white transition-all duration-300 z-50"
         ref={userBarRef}
       >
+       {<ChatBox/>}
         <button
           className="w-full py-2 bg-gray-700 text-white hover:bg-gray-600"
           onClick={closeUserBar}

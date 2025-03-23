@@ -36,10 +36,15 @@ const App = () => {
       S4() 
     );
   };
-  const [userNo, setUserNo] = useState(0);
+  const [userNo, setUserNo] = useState<number>(0);
   const [roomJoined, setRoomJoined] = useState(false);
   const [user, setUser] = useState<User>({ id: uuid(), username: "", presenter: false });
   const [users, setUsers] = useState<any[]>([]);
+  const [massage,setmessage]=useState<string>("");
+  const [messages,setMessages]=useState<string[]>([]);
+  const[ws,setWs]=useState<WebSocket | null>(null);
+
+
   
 
 
@@ -49,6 +54,37 @@ const App = () => {
       socket.emit("userJoined",user);
     }},[roomJoined]);
 
+    useEffect(() => {
+
+      const websocket = new WebSocket('ws://127.0.0.1:50000');
+      websocket.onopen = () => {
+        console.log('WebSocket is connected');
+        // Generate a unique client ID
+        setUserNo(userNo+1); };
+       websocket.onmessage = (evt) => {
+        const message = (evt.data);
+        setMessages((prevMessages) =>
+            [...prevMessages, message]);
+    };
+    websocket.onclose = () => {
+      console.log('WebSocket is closed');
+      setUserNo(userNo-1);  
+  };
+  setWs(websocket);
+  return () => {
+    websocket.close();
+};
+   
+
+
+
+      return () => {
+        websocket.close();
+      };
+    }, []);
+    
+  
+
  
   return (
   
@@ -57,7 +93,7 @@ const App = () => {
   <ToastContainer/>
   {roomJoined?(
     <>
-      <Userbar users={users} user={user} socket={socket} />{
+      <Userbar users={users} user={user} socket={socket} userNo={userNo} />{
         user.presenter ? (
         <Whiteboard user={user} userNo={userNo}  socket={socket} setUsers={setUsers} setUserNo={setUserNo}/>
       ):(

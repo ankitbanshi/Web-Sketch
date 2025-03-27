@@ -40,7 +40,10 @@ const UserBar: React.FC<userBarProps> = ({ users,  socket ,userNo}) => {
         className="fixed top-0 left-[-100%] h-full w-40 bg-gray-900 text-white transition-all duration-300 z-50"
         ref={userBarRef}
       >
-       {<ChatBox/>}
+       {<ChatBox
+        socket={socket}
+       userNo={userNo}
+      />}
         <button
           className="w-full py-2 bg-gray-700 text-white hover:bg-gray-600"
           onClick={closeUserBar}

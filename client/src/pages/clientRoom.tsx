@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { Socket } from "socket.io-client";
 
@@ -9,37 +9,50 @@ interface ClientRoomProps {
   setUserNo: (num: number) => void;
 }
 
-const ClientRoom: React.FC<ClientRoomProps> = ({ userNo, socket, setUsers, setUserNo }) => {
+const ClientRoom: React.FC<ClientRoomProps> = ({
+  userNo,
+  socket,
+  setUsers,
+  setUserNo,
+}) => {
   const imgRef = useRef<HTMLImageElement | null>(null);
+  const [canvasImage, setCanvasImage] = useState<string | null>(null);
 
+  // Show incoming messages as toast notifications
   useEffect(() => {
     socket.on("message", (data: { message: string }) => {
       toast.info(data.message);
     });
+
+    return () => {
+      socket.off("message");
+    };
   }, [socket]);
 
+  // Update user list and count
   useEffect(() => {
     socket.on("users", (data: { id: string; username: string }[]) => {
       setUsers(data);
       setUserNo(data.length);
     });
+
+    return () => {
+      socket.off("users");
+    };
   }, [socket, setUsers, setUserNo]);
 
+  // Update canvas image
   useEffect(() => {
     const updateCanvasImage = (data: string) => {
-      if (imgRef.current) {
-        imgRef.current.src = data;
-      }
+      setCanvasImage(data);
     };
-  
+
     socket.on("canvasImage", updateCanvasImage);
-  
-    // Cleanup listener when component unmounts
+
     return () => {
       socket.off("canvasImage", updateCanvasImage);
     };
   }, [socket]);
-  
 
   return (
     <div className="container mx-auto p-4">
@@ -49,8 +62,15 @@ const ClientRoom: React.FC<ClientRoomProps> = ({ userNo, socket, setUsers, setUs
         </h1>
       </div>
       <div className="flex justify-center mt-5">
-        <div className="w-3/4 h-[500px] border border-gray-800 overflow-hidden">
-          <img ref={imgRef} src="" alt="Canvas Image" className="w-full h-full" />
+        <div className="w-3/4 h-[500px] border border-gray-800 overflow-hidden bg-white">
+          {canvasImage && (
+            <img
+              ref={imgRef}
+              src={canvasImage}
+              alt="Canvas Image"
+              className="w-full h-full object-contain"
+            />
+          )}
         </div>
       </div>
     </div>

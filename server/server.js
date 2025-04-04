@@ -14,34 +14,34 @@ app.get("/", (req, res) => {
   res.send("server");
 });
 
-// socket.io
-let imageGlobalUrl;
+// Global image data
+let imageGlobalUrl = null;
+
 io.on("connection", (socket) => {
   socket.on("user-joined", (data) => {
-    const { roomId, userId, userName, host, presenter } = data;
-    socket.userRoom = roomId; // Store room on socket
+    const { roomId, userName, host, presenter } = data;
+    socket.userRoom = roomId;
+
     const user = userJoin(socket.id, userName, roomId, host, presenter);
     const roomUsers = getUsers(user.room);
+
     socket.join(user.room);
     socket.emit("message", { message: "Welcome to ChatRoom" });
-    socket.broadcast.to(user.room).emit("WhiteBoardDataResponse", {
-     imageUrl:imageGlobalUrl,
-    });
-  
-    io.to(user.room).emit("users", roomUsers);
-  
-    // Send the existing image only if there is one
-    if (imageUrl) {
+
+    // Send whiteboard data if available
+    if (imageGlobalUrl) {
       socket.emit("WhiteBoardDataResponse", {
-        imageUrl: data,
+        imageUrl: imageGlobalUrl,
       });
     }
+
+    io.to(user.room).emit("users", roomUsers);
   });
-  
 
   socket.on("drawing", (data) => {
+    console.log("Received drawing data:", data);
     imageGlobalUrl = data;
-    socket.broadcast.to(socket.userRoom).emit("canvasImage", imageUrl);
+    socket.broadcast.to(socket.userRoom).emit("canvasImage", data);
   });
 
   socket.on("disconnect", () => {
@@ -55,7 +55,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// serve on port
+// Server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`server is listening on http://localhost:${PORT}`);

@@ -42,7 +42,6 @@ const App = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [massage,setmessage]=useState<string>("");
   const [messages,setMessages]=useState<string[]>([]);
-  const[ws,setWs]=useState<WebSocket | null>(null);
 
 
   
@@ -54,32 +53,25 @@ const App = () => {
       socket.emit("userJoined",user);
     }},[roomJoined]);
 
+    
     useEffect(() => {
-
-      const websocket = new WebSocket('ws://127.0.0.1:50000');
-      websocket.onopen = () => {
-        console.log('WebSocket is connected');
-        // Generate a unique client ID
-        setUserNo(userNo+1); };
-       websocket.onmessage = (evt) => {
-        const message = (evt.data);
-        setMessages((prevMessages) =>
-            [...prevMessages, message]);
-    };
-    websocket.onclose = () => {
-      console.log('WebSocket is closed');
-      setUserNo(userNo-1);  
-  };
-  setWs(websocket);
-  return () => {
-    websocket.close();
-};
-   
-
-
-
+      // Listen for messages from server
+      socket.on("message", (data: string) => {
+        setMessages(prevMessages => [...prevMessages, data]);
+      });
+    
+      socket.on("connect", () => {
+        console.log("Connected to server");
+        setUserNo(prev => prev + 1);
+      });
+    
+      socket.on("disconnect", () => {
+        console.log("Disconnected from server");
+        setUserNo(prev => prev - 1);
+      });
+    
       return () => {
-        websocket.close();
+        socket.disconnect();
       };
     }, []);
     

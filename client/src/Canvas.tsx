@@ -108,8 +108,10 @@ const Canvas = ({
         });
       }
     });
-    const canvasImage = canvasRef.current.toDataURL();
-    socket.emit("drawing", canvasImage);
+    const canvasImage = canvasRef.current?.toDataURL();
+    if(canvasImage){
+      console.log("Emmiting cnva Image",canvasImage);
+    socket.emit("drawing", canvasImage);}
   }, [elements]);
 
   const handleMouseMove = (e: React.MouseEvent) => {

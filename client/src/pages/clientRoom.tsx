@@ -1,56 +1,114 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { Socket } from "socket.io-client";
+import rough from "roughjs";
+
+const generator = rough.generator();
 
 interface ClientRoomProps {
-  userNo: number;
   socket: Socket;
-  setUsers: (users: { id: string; username: string }[]) => void;
-  setUserNo: (num: number) => void;
+  drawingHistory: any[];
+  userNo: number;
 }
 
-const ClientRoom: React.FC<ClientRoomProps> = ({
-  userNo,
-  socket,
-  setUsers,
-  setUserNo,
-}) => {
-  const imgRef = useRef<HTMLImageElement | null>(null);
-  const [canvasImage, setCanvasImage] = useState<string | null>(null);
+const ClientRoom: React.FC<ClientRoomProps> = ({ socket, drawingHistory, userNo }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [elements, setElements] = useState<any[]>([]);
+  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
 
-  // Show incoming messages as toast notifications
+  // Canvas setup
   useEffect(() => {
-    socket.on("message", (data: { message: string }) => {
-      toast.info(data.message);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const scale = window.devicePixelRatio;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    context.scale(scale, scale);
+    context.lineCap = "round";
+    context.lineWidth = 5;
+    setCtx(context);
+  }, []);
+
+  // Handle drawing history updates
+  useLayoutEffect(() => {
+    if (drawingHistory.length > 0) {
+      setElements(drawingHistory);
+    }
+  }, [drawingHistory]);
+
+  // Redraw canvas when elements change
+  useLayoutEffect(() => {
+    const redrawCanvas = () => {
+      const canvas = canvasRef.current;
+      if (!canvas || !ctx) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const roughCanvas = rough.canvas(canvas);
+
+      elements.forEach((ele) => {
+        if (!ele.element) return;
+
+        switch (ele.element) {
+          case "rect":
+            roughCanvas.draw(
+              generator.rectangle(
+                ele.offsetX,
+                ele.offsetY,
+                ele.width,
+                ele.height,
+                { stroke: ele.stroke, roughness: 0, strokeWidth: 5 }
+              )
+            );
+            break;
+          case "line":
+            roughCanvas.draw(
+              generator.line(
+                ele.offsetX,
+                ele.offsetY,
+                ele.width,
+                ele.height,
+                { stroke: ele.stroke, roughness: 0, strokeWidth: 5 }
+              )
+            );
+            break;
+          case "pencil":
+            roughCanvas.linearPath(ele.path, {
+              stroke: ele.stroke,
+              roughness: 0,
+              strokeWidth: 5,
+            });
+            break;
+        }
+      });
+    };
+
+    redrawCanvas();
+  }, [elements, ctx]);
+
+  // Socket listeners
+  useEffect(() => {
+    const handleNewDrawing = (data: any) => {
+      setElements(prev => [...prev, data]);
+    };
+
+    socket.on("canvasImage", handleNewDrawing);
+    socket.on("drawing_history", (history: any[]) => {
+      setElements(history);
     });
 
     return () => {
-      socket.off("message");
-    };
-  }, [socket]);
-
-  // Update user list and count
-  useEffect(() => {
-    socket.on("users", (data: { id: string; username: string }[]) => {
-      setUsers(data);
-      setUserNo(data.length);
-    });
-
-    return () => {
-      socket.off("users");
-    };
-  }, [socket, setUsers, setUserNo]);
-
-  // Update canvas image
-  useEffect(() => {
-    const updateCanvasImage = (data: string) => {
-      setCanvasImage(data);
-    };
-
-    socket.on("canvasImage", updateCanvasImage);
-
-    return () => {
-      socket.off("canvasImage", updateCanvasImage);
+      socket.off("canvasImage", handleNewDrawing);
+      socket.off("drawing_history");
     };
   }, [socket]);
 
@@ -58,19 +116,12 @@ const ClientRoom: React.FC<ClientRoomProps> = ({
     <div className="container mx-auto p-4">
       <div className="text-center py-4">
         <h1 className="text-2xl font-bold">
-          React Drawing App - Users Online: {userNo}
+          Collaborative Whiteboard - Users Online: {userNo}
         </h1>
       </div>
       <div className="flex justify-center mt-5">
-        <div className="w-3/4 h-[500px] border border-gray-800 overflow-hidden bg-white">
-          {canvasImage && (
-            <img
-              ref={imgRef}
-              src={canvasImage}
-              alt="Canvas Image"
-              className="w-full h-full object-contain"
-            />
-          )}
+        <div className="w-full h-[500px] border border-gray-800 overflow-hidden">
+          <canvas ref={canvasRef} className="w-full h-full bg-white" />
         </div>
       </div>
     </div>

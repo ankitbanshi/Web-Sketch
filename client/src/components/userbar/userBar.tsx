@@ -1,62 +1,86 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 import ChatBox from "../chat";
+
 interface User {
   id: string;
   username: string;
+  room?: string;
 }
 
-interface userBarProps {
-  users: User[];
+interface UserBarProps {
   user: User;
-  socket: Socket;
-  userNo:number;
+  socket: Socket; 
+  userNo: number;
+  users: User[]; 
 }
 
-const UserBar: React.FC<userBarProps> = ({ users,  socket ,userNo}) => {
-  const userBarRef = useRef<HTMLDivElement | null>(null);
 
-  const openUserBar = () => {
-    if (userBarRef.current) {
-      userBarRef.current.style.left = "0";
-    }
-  };
+const UserBar: React.FC<UserBarProps> = ({ socket, user }) => {
+  const userBarRef = useRef<HTMLDivElement>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const closeUserBar = () => {
+  useEffect(() => {
+    const handleUsersUpdate = (updatedUsers: User[]) => {
+      setUsers(updatedUsers.filter(u => u.room === user.room));
+    };
+
+    socket.on("newUserResponse", handleUsersUpdate);
+
+    return () => {
+      socket.off("newUserResponse", handleUsersUpdate);
+    };
+  }, [socket, user.room]);
+
+  const toggleUserBar = () => {
+    setIsOpen(!isOpen);
     if (userBarRef.current) {
-      userBarRef.current.style.left = "-100%";
+      userBarRef.current.style.left = isOpen ? "-100%" : "0";
     }
   };
 
   return (
     <>
       <button
-        className="absolute top-5 left-5 bg-gray-800 text-white px-3 py-1 text-sm rounded"
-        onClick={openUserBar}
+        className="absolute top-5 left-5 bg-gray-800 text-white px-3 py-1 text-sm rounded z-50"
+        onClick={toggleUserBar}
       >
-        Users
+        {isOpen ? "Close" : "Users"} ({users.length})
       </button>
+      
       <div
-        className="fixed top-0 left-[-100%] h-full w-40 bg-gray-900 text-white transition-all duration-300 z-50"
+        className="fixed top-0 left-[-100%] h-full w-72 bg-gray-900 text-white transition-all duration-300 z-40 flex flex-col"
         ref={userBarRef}
       >
-       {<ChatBox
-        socket={socket}
-       userNo={userNo}
-      />}
-        <button
-          className="w-full py-2 bg-gray-700 text-white hover:bg-gray-600"
-          onClick={closeUserBar}
-        >
-          Close
-        </button>
-        <div className="w-full mt-5 text-center">
+        <div className="p-4 border-b border-gray-700">
+          <h2 className="text-xl font-bold">Participants</h2>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4">
           {users.map((usr) => (
-            <p key={usr.id} className="py-2 border-b border-gray-700">
-              {usr.username}
-              {usr.id === socket.id && " - (You)"}
-            </p>
+            <div 
+              key={usr.id}
+              className="py-2 px-4 mb-2 rounded hover:bg-gray-800 transition-colors"
+            >
+              <span className="flex items-center">
+                <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                {usr.username}
+                {usr.id === socket.id && (
+                  <span className="ml-2 text-gray-400 text-sm">(You)</span>
+                )}
+              </span>
+            </div>
           ))}
+        </div>
+
+        <div className="border-t border-gray-700 p-4">
+          <ChatBox 
+            socket={socket}
+            userNo={users.length}
+            roomId={user.room || ""}
+            username={user.username}
+          />
         </div>
       </div>
     </>

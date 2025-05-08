@@ -1,64 +1,85 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Socket } from "socket.io-client";
 
 interface ChatBoxProps {
   socket: Socket;
   userNo: number;
+  roomId: string;
+  username: string;
 }
 
 interface Message {
   id: string;
-  username: string;
+  name: string;
   text: string;
- 
+  socketID: string;
 }
 
-const ChatBox: React.FC<ChatBoxProps> = ({ socket, userNo }) => {
+const ChatBox: React.FC<ChatBoxProps> = ({ socket, userNo, roomId, username }) => {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Listen for incoming messages
-    socket.on("chat message", (msg: Message) => {
+    const handleMessageResponse = (msg: Message) => {
       setMessages((prev) => [...prev, msg]);
-    });
+    };
+
+    socket.on("messageResponse", handleMessageResponse);
+    
+    // Load chat history when joining
+    socket.emit("join_room", roomId);
 
     return () => {
-      socket.off("chat message");
+      socket.off("messageResponse", handleMessageResponse);
     };
-  }, [socket]);
+  }, [socket, roomId]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handleSendMessage = () => {
     if (message.trim()) {
       const newMessage: Message = {
-        id: socket.id || "unknown id",
-        username: `User${userNo}`, 
+        id: `${socket.id}${Date.now()}`,
+        name: username,
         text: message,
-      
+        socketID: socket.id || ""
       };
-      socket.emit("chat message", newMessage);
-      setMessages((prev) => [...prev, newMessage]);
+      
+      socket.emit("message", {
+        ...newMessage,
+        room: roomId
+      });
+      
       setMessage("");
     }
   };
 
   return (
-    <div className="flex flex-col h-96 w-full bg-gray-800 text-white rounded-lg shadow-lg ">
+    <div className="flex flex-col h-96 w-full bg-gray-800 text-white rounded-lg shadow-lg">
+      <div className="p-4 border-b border-gray-700">
+        <h3 className="font-semibold">Chat ({userNo} users online)</h3>
+      </div>
+      
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {messages.map((msg, index) => (
           <div
-            key={index}
+            key={msg.id}
             className={`p-2 rounded-lg ${
-              msg.id === socket.id ? "bg-blue-500 ml-auto" : "bg-gray-700"
+              msg.socketID === socket.id ? "bg-blue-500 ml-auto" : "bg-gray-700"
             }`}
           >
             <div className="text-sm font-bold">
-              {msg.username}
+              {msg.socketID === socket.id ? "You" : msg.name}
             </div>
             <div>{msg.text}</div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
+      
       <div className="flex items-center border-t border-gray-700 p-3">
         <input
           type="text"

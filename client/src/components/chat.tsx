@@ -25,13 +25,18 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket, userNo, roomId, username }) =
       setMessages((prev) => [...prev, msg]);
     };
 
-    socket.on("messageResponse", handleMessageResponse);
-    
     // Load chat history when joining
     socket.emit("join_room", roomId);
 
+    // Set up message listeners
+    socket.on("messageResponse", handleMessageResponse);
+    socket.on("messageHistory", (history: Message[]) => {
+      setMessages(history);
+    });
+
     return () => {
       socket.off("messageResponse", handleMessageResponse);
+      socket.off("messageHistory");
     };
   }, [socket, roomId]);
 
@@ -64,7 +69,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket, userNo, roomId, username }) =
       </div>
       
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {messages.map((msg, index) => (
+        {messages.map((msg) => (
           <div
             key={msg.id}
             className={`p-2 rounded-lg ${

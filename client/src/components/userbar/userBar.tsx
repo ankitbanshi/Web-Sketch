@@ -10,11 +10,8 @@ interface User {
 
 interface UserBarProps {
   user: User;
-  socket: Socket; 
-  userNo: number;
-  users: User[]; 
+  socket: Socket;
 }
-
 
 const UserBar: React.FC<UserBarProps> = ({ socket, user }) => {
   const userBarRef = useRef<HTMLDivElement>(null);
@@ -27,6 +24,9 @@ const UserBar: React.FC<UserBarProps> = ({ socket, user }) => {
     };
 
     socket.on("newUserResponse", handleUsersUpdate);
+    
+    // Request initial user list
+    socket.emit("getUsers");
 
     return () => {
       socket.off("newUserResponse", handleUsersUpdate);
@@ -36,7 +36,7 @@ const UserBar: React.FC<UserBarProps> = ({ socket, user }) => {
   const toggleUserBar = () => {
     setIsOpen(!isOpen);
     if (userBarRef.current) {
-      userBarRef.current.style.left = isOpen ? "-100%" : "0";
+      userBarRef.current.style.transform = `translateX(${isOpen ? "-100%" : "0"})`;
     }
   };
 
@@ -50,8 +50,9 @@ const UserBar: React.FC<UserBarProps> = ({ socket, user }) => {
       </button>
       
       <div
-        className="fixed top-0 left-[-100%] h-full w-72 bg-gray-900 text-white transition-all duration-300 z-40 flex flex-col"
+        className="fixed top-0 left-0 h-full w-72 bg-gray-900 text-white transition-transform duration-300 z-40 flex flex-col"
         ref={userBarRef}
+        style={{ transform: "translateX(-100%)" }}
       >
         <div className="p-4 border-b border-gray-700">
           <h2 className="text-xl font-bold">Participants</h2>

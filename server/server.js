@@ -15,8 +15,24 @@ app.get("/", (req, res) => {
 });
 
 const roomHistory = {};
+const messageHistory = {}; // Message storage added
+
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
+
+  // Moved message handler inside connection but outside user-joined
+  socket.on("message", (msg) => {
+    if (!socket.userRoom) return;
+    
+    // Store message
+    if (!messageHistory[socket.userRoom]) {
+      messageHistory[socket.userRoom] = [];
+    }
+    messageHistory[socket.userRoom].push(msg);
+
+    // Broadcast to room
+    io.to(socket.userRoom).emit("messageResponse", msg);
+  });
 
   socket.on("user-joined", (data) => {
     const { roomId, userName, host, presenter } = data;
@@ -27,17 +43,21 @@ io.on("connection", (socket) => {
 
     socket.join(user.room);
 
-   
-    socket.emit("message", { message: "Welcome to ChatRoom" });
+    // Send chat history when joining
+    if (messageHistory[roomId]) {
+      socket.emit("messageHistory", messageHistory[roomId]);
+    }
 
- 
+    // Corrected user update event
+    io.to(user.room).emit("newUserResponse", roomUsers);
+
+    // Original drawing history code remains
     if (roomHistory[roomId]) {
       socket.emit("drawing_history", roomHistory[roomId]);
     }
-
-    io.to(user.room).emit("users", roomUsers);
   });
 
+  // Rest of the original code remains unchanged
   socket.on("drawing", (data) => {
     if (!socket.userRoom) return;
 
@@ -46,7 +66,6 @@ io.on("connection", (socket) => {
     }
     roomHistory[socket.userRoom].push(data);
 
-   
     socket.broadcast.to(socket.userRoom).emit("canvasImage", data);
   });
 
@@ -59,7 +78,6 @@ io.on("connection", (socket) => {
     }
   });
 
- 
   socket.on("disconnect", () => {
     const userLeaves = userLeave(socket.id);
     if (userLeaves) {

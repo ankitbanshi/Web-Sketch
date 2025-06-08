@@ -50,12 +50,12 @@ const UserBar: React.FC<UserBarProps> = ({ socket, user }) => {
       </button>
       
       <div
-        className="fixed top-0 left-0 h-full w-72 bg-gray-900 text-white transition-transform duration-300 z-40 flex flex-col"
+        className="fixed top-0 left-0 h-full w-58 bg-gray-900 text-white transition-transform duration-300 z-40 flex flex-col"
         ref={userBarRef}
         style={{ transform: "translateX(-100%)" }}
       >
         <div className="p-4 border-b border-gray-700">
-          <h2 className="text-xl font-bold">Participants</h2>
+       
         </div>
         
         <div className="flex-1 overflow-y-auto p-4">

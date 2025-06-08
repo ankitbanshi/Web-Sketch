@@ -63,7 +63,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket, userNo, roomId, username }) =
   };
 
   return (
-    <div className="flex flex-col h-96 w-full bg-gray-800 text-white rounded-lg shadow-lg">
+    <div className="flex flex-col h-96 w-50   bg-gray-800  text-white rounded-lg shadow-lg">
       <div className="p-4 border-b border-gray-700">
         <h3 className="font-semibold">Chat ({userNo} users online)</h3>
       </div>
@@ -85,17 +85,17 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket, userNo, roomId, username }) =
         <div ref={messagesEndRef} />
       </div>
       
-      <div className="flex items-center border-t border-gray-700 p-3">
+      <div className="flex justify-center items-center border-t  border-gray-700 p-3">
         <input
           type="text"
-          className="flex-1 bg-gray-700 text-white p-2 rounded-l-lg outline-none"
+          className="flex-1 bg-gray-700 w-30 text-white p-2 rounded-l-lg outline-none"
           placeholder="Type a message..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
         />
         <button
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r-lg"
+          className="bg-blue-600 w-50 hover:bg-blue-700 text-white px-4 py-2 rounded-r-lg"
           onClick={handleSendMessage}
         >
           Send

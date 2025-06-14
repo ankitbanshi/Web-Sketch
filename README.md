@@ -17,9 +17,9 @@ Web-Sketch is a real-time collaborative web drawing application. It allows multi
 ## Project Structure
 
 Web-Sketch/
-├── client/ # React + Vite frontend
-├── server/ # Node.js + Express + Socket.IO backend
-└── README.md # Project documentation
+ - client/ # React + Vite frontend
+ -  server/ # Node.js + Express + Socket.IO backend
+ - README.md # Project documentation
 
 
 ---

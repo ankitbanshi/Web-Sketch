@@ -4,7 +4,7 @@ import io from "socket.io-client";
 import ClientRoom from "./ClientRoom";
 import JoinCreateRoom from "./JoinCreateRoom";
 import Room from "./Room";
-import Sidebar from "./Sidebar";
+import Sidebar from "./SideBar"
 
 
 const server = "http://localhost:5000";
@@ -15,7 +15,7 @@ const connectionOptions = {
   transports: ["websocket"],
 };
 
-const socket = io(server, connectionOptions);
+const socket = io(server, { transports: ["websocket"] });
 
 const App = () => {
   const [userNo, setUserNo] = useState(0);

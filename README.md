@@ -1,6 +1,6 @@
 # Web-Sketch
 
-Web-Sketch is a real-time collaborative web drawing application. It allows multiple users to sketch together on a shared canvas, supporting interactive features and live updates. The project features a React/Vite frontend and a Node.js/Express backend with Socket.IO for real-time communication.
+Web-Sketch is a real-time collaborative web drawing application. It allows multiple users to be together on a shared canvas, supporting interactive features and live updates. The project features a React/Vite frontend and a Node.js/Express backend with Socket.IO for real-time communication.
 
 ---
 
